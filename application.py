@@ -31,6 +31,8 @@ Session(app)
 # Configure CS50 Library to use SQLite database
 db = SQL("sqlite:///audio_test.db")
 
+user_id = session.get("user_id")
+
 @app.route("/")
 @login_required
 def index():
@@ -63,12 +65,20 @@ def test():
             else:
                 db.execute("INSERT INTO speakers (name) VALUES (:name)", name = speaker_name)
 
-        60hz = request.form.get("heard60")
-        50hz = request.form.get("heard50")
-        40hz = request.form.get("heard40")
-        30hz = request.form.get("heard30")
-        20hz = request.form.get("heard20")
-        
+        lowest_freq = 70
+        freq_list = request.form.getlist("freq_list")
+
+        for i in range(4):
+            if freq_list[i] == 1:
+                lowest_freq = lowest_freq - 10
+
+        speaker_id_table = db.execute("SELECT FROM speakers WHERE name = :name", name = speaker_name)
+        speaker_id = speaker_id_table[0]['speaker_id']
+
+        db.execute("INSERT INTO freq_test (user_id, speaker_id, lowest_frequency) VALUES (:user_id, :speaker_id, :lowest_frequency",
+        user_id = user_id, speaker_id = speaker_id, lowest_frequency = lowest_freq)
+
+
 
     else:
         return render_template("test.html")
